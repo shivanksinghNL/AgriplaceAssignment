@@ -1,6 +1,6 @@
 # Package Viewer
 
-This project is a simple web application that displays information about installed packages on a Debian or Ubuntu system. It uses Flask for the backend and Bootstrap for the frontend.
+This project is a simple web application that displays information about installed packages on a Debian or Ubuntu system. It uses Flask for the backend and HTML, Javascript and  Bootstrap for the frontend.
 
 ## Features
 
