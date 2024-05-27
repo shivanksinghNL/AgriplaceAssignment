@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Package Viewer</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+        }
+        .package-details {
+            overflow-y: auto;
+            height: calc(100vh - 40px);
+        }
+        #package-list {
+            overflow-y: auto;
+            height: calc(100vh - 80px);
+        }
+        .package-list-item:hover {
+            background-color: #99d9a0;
+            cursor: pointer;
+        }
+        h3 {
+            font-weight: bold;
+            color: green;
+            font-size: 24px;
+         }
+        .custom-list-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .custom-list-item:hover {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <h2 style="font-weight: bold">Installed Packages</h1>
+                <ul id="package-list" class="list-group">
+                </ul>
+            </div>
+            <div class="col-md-6 package-details">
+                <h2 style="font-weight: bold">Select a package to view details</h2>
+                <div id="package-details">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchPackages() {
+            const response = await fetch('/packages');
+            const packages = await response.json();
+            const packageList = document.getElementById('package-list');
+            packageList.innerHTML = '';
+            packages.forEach(pkg => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item package-list-item custom-list-item';
+                li.textContent = pkg;
+                li.addEventListener('click', () => fetchPackageDetails(pkg));
+                packageList.appendChild(li);
+            });
+        }
+
+        async function fetchPackageDetails(packageName) {
+            const response = await fetch(`/packages/${packageName}`);
+            const packageDetails = await response.json();
+            const detailsDiv = document.getElementById('package-details');
+            if (packageDetails.error) {
+                detailsDiv.textContent = packageDetails.error;
+            } else {
+                detailsDiv.innerHTML = `
+                    <h3>${packageDetails.name}</h2>
+                    <p>${packageDetails.description || 'No description available'}</p>
+                    <h5 style=" background: green; color: white "> Dependencies</h3>
+                    <ul>
+                        ${packageDetails.dependencies.map(dep => `<li style="cursor:pointer;"><a href=${dep.details_url}>${dep.name}</a></li>`).join('')  || 'No dependencies present'}
+                    </ul>
+                    <h5 style=" background: green; color: white ">Reverse Dependencies</h3>
+                    <ul>
+                        ${packageDetails.reverse_dependencies.map(dep => `<li style="cursor:pointer;"><a href=${dep.details_url}>${dep.name}</a></li>`).join('')  || 'No reverse dependencies present'}
+                    </ul>
+                `;
+            }
+        }
+        fetchPackages();
+    </script>
+</body>
+</html>
